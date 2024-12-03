@@ -22,7 +22,7 @@ CREATE TABLE UserSchema.UserTBL (
 );
 
 
-
+truncate table UserSchema.UserTBL
 
 CREATE TABLE PostSchema.PostTBL (
     PostId INT PRIMARY KEY IDENTITY, 
@@ -47,3 +47,55 @@ CREATE TABLE CommentSchema.CommentTBL (
     CONSTRAINT FK_Comment_User FOREIGN KEY (UserId) REFERENCES UserSchema.UserTBL(UserId) ON DELETE CASCADE,
     CONSTRAINT FK_Comment_Post FOREIGN KEY (PostId) REFERENCES PostSchema.PostTBL(PostId) ON DELETE CASCADE
 );
+
+
+Alter PROCEDURE SignupUser
+    @first_name VARCHAR(255),
+    @last_name VARCHAR(255),
+    @username VARCHAR(255),
+    @UserPass VARCHAR(255),
+    @email VARCHAR(255),
+	@message varchar(255) output
+AS
+BEGIN
+	begin try
+			-- Insert user data into UserTBL
+		INSERT INTO UserSchema.UserTBL (FirstName, LastName, UserName, UserPass, Email)
+		VALUES (@first_name, @last_name, @username, @UserPass, @email);
+    
+		-- Optionally, you can return a message or output variable
+		set @message = 'Signup successfull!'
+	end try
+	begin catch
+		set @message = 'Error Occured!'
+	end catch
+
+END;
+
+
+declare @msg varchar(30);
+exec SignupUser 'test','lasttest','test123','test@123','test@gmail.com',@msg output;
+select @msg
+
+
+
+alter PROCEDURE SignInUser
+    @username VARCHAR(255) = null,
+	@email VARCHAR(255)= null,
+    @UserPass VARCHAR(255),
+	@userData int output
+AS
+BEGIN
+	begin try
+
+		select @userData =  UserId from UserSchema.UserTBL where UserName = @username or Email = @email;
+	end try
+	begin catch
+		set @userData =-1
+	end catch
+
+END;
+
+declare @dt int;
+exec SignInUser @email= 'test@gmail.com',@UserPass='test@123',@userData=@dt output;
+select @dt
